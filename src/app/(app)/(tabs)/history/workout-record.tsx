@@ -12,6 +12,7 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   ScrollView,
+  Alert,
 } from "react-native";
 
 const getworkoutrecordquery =
@@ -61,6 +62,8 @@ const Workoutrecord = () => {
         setLoading(false);
       }
     };
+
+    fetchworkout();
   }, [workoutId]);
 
   const formatData = (dateString?: string) => {
@@ -145,7 +148,44 @@ const Workoutrecord = () => {
   }
 
   const { volume, unit } = getTotalVolume();
-  const handleDeleteWorkout = () => {};
+
+  const deleteworkout = async () => {
+    if (!workoutId) return;
+    setIsDeleted(true);
+
+    try {
+      await fetch(`/api/delete-workout`, {
+        method: "POST",
+        body: JSON.stringify({ workoutId }),
+      });
+      router.replace("/(app)/(tabs)/history?refresh=true");
+    } catch (error) {
+      console.error("Error deleting workout", error);
+      Alert.alert("Error", "Failed to delet workout. please try again", [
+        { text: "ok" },
+      ]);
+    } finally {
+      setIsDeleted(true);
+    }
+  };
+
+  const handleDeleteWorkout = () => {
+    Alert.alert(
+      "Delete workout",
+      "Are you sure you want to delete this workout? this action can not be undone",
+      [
+        {
+          text: "Cancle",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: deleteworkout,
+        },
+      ]
+    );
+  };
 
   return (
     <SafeAreaView className=" flex-1 bg-gray-50">
@@ -178,7 +218,7 @@ const Workoutrecord = () => {
           </View>
 
           <View className=" flex-row items-center mb-3">
-            <Ionicons name="time-outline" color="#6b7280" />
+            <Ionicons name="time-outline" size={20} color="#6b7280" />
             <Text className=" text-gray-700 ml-3 font-medium">
               {formatWorkoutDurarion(workout?.duration)}
             </Text>
@@ -207,11 +247,11 @@ const Workoutrecord = () => {
             </View>
           )}
         </View>
-        <View className=" space-y-4 p-5 gap-4">
+        <View className=" space-y-4 p-4 gap-4">
           {workout?.exercises?.map((data, index) => (
             <View
               key={data?._key}
-              className=" bg-white rounded-xl p-5 shadow border border-gray-100"
+              className=" bg-white rounded-xl p-5 shadow-sm border border-gray-100"
             >
               <View className=" flex-row items-center justify-between mb-4">
                 <View className=" flex-1">
@@ -234,7 +274,7 @@ const Workoutrecord = () => {
                 {data?.sets?.map((set, setIndex) => (
                   <View
                     key={set?._key}
-                    className=" bg-gray-50 rounded-md flex-row items-center justify-between"
+                    className=" bg-gray-50 mt-[3.8px] rounded-md flex-row p-1 items-center justify-between"
                   >
                     <View className=" flex-row items-center">
                       <View className=" bg-gray-200 rounded-full w-6 h-6 items-center justify-center mr-3">
@@ -260,6 +300,24 @@ const Workoutrecord = () => {
                   </View>
                 ))}
               </View>
+              {data?.sets && data.sets.length > 0 && (
+                <View className=" mt-4 pt-4 border-t border-gray-100">
+                  <View className=" flex-row items-center justify-between">
+                    <Text className=" text-sm font-bold text-gray-600">
+                      Exercise Volume
+                    </Text>
+                    <Text className=" text-sm font-bold text-gray-900">
+                      {data.sets
+                        .reduce((total, set) => {
+                          return total + (set.weight || 0) * (set.reps || 0);
+                        }, 0)
+                        .toLocaleString()}{" "}
+                      {""}
+                      {data.sets[0]?.weightUnit || "lbs"}
+                    </Text>
+                  </View>
+                </View>
+              )}
             </View>
           ))}
         </View>

@@ -35,7 +35,7 @@ const Layout = () => {
           ),
         }}
       />
-      {/* <Tabs.Screen
+      <Tabs.Screen
         name="active-workout"
         options={{
           title: "Active Workout",
@@ -45,7 +45,7 @@ const Layout = () => {
           //     display: "none",
           //   },
         }}
-      /> */}
+      />
       <Tabs.Screen
         name="history"
         options={{

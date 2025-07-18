@@ -15,6 +15,15 @@
       ]
     ],
     "name": "fit-app",
-    "slug": "fit-app"
+    "slug": "workout-app",
+    "extra": {
+      "router": {
+        "origin": "https://n"
+      },
+      "eas": {
+        "projectId": "ea957e09-1927-4264-ab5d-fdcbef2ada21"
+      }
+    },
+    "owner": "ariham"
   }
 }
