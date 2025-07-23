@@ -38,6 +38,33 @@ export const getworkoutquery =
    }
   }`);
 
+export const formatdate = (dateString: string) => {
+  const date = new Date(dateString);
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  if (date.toDateString() === today.toDateString()) {
+    return "today";
+  } else if (date.toDateString() === yesterday.toDateString()) {
+    return "Yesterday";
+  } else {
+    return date.toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+    });
+  }
+};
+
+export const getTotalSets = (workout: GetworkoutqueryResult[number]) => {
+  return (
+    workout?.exercises?.reduce((total, exercise) => {
+      return total + (exercise?.sets?.length || 0);
+    }, 0) || 0
+  );
+};
+
 export default function Page() {
   const [loading, setLoading] = useState(false);
   const [workouts, setWorkOuts] = useState<GetworkoutqueryResult>(null);
@@ -82,37 +109,10 @@ export default function Page() {
     fetchWorkouts();
   };
 
-  const formatdate = (dateString: string) => {
-    const date = new Date(dateString);
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-
-    if (date.toDateString() === today.toDateString()) {
-      return "today";
-    } else if (date.toDateString() === yesterday.toDateString()) {
-      return "Yesterday";
-    } else {
-      return date.toLocaleDateString("en-US", {
-        weekday: "short",
-        month: "short",
-        day: "numeric",
-      });
-    }
-  };
-
   const formatWorkoutDuration = (seconds?: number) => {
     if (!seconds) return "Duration not received";
 
     return formatDuration(seconds);
-  };
-
-  const getTotalSets = (workout: GetworkoutqueryResult[number]) => {
-    return (
-      workout?.exercises?.reduce((total, exercise) => {
-        return total + (exercise?.sets?.length || 0);
-      }, 0) || 0
-    );
   };
 
   const exerciesName = (workout: GetworkoutqueryResult[number]) => {

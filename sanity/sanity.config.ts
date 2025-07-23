@@ -6,7 +6,7 @@ import {schemaTypes} from './schemaTypes'
 export default defineConfig({
   name: 'default',
   title: 'workout-app',
-
+  studioHost: 'fitness-app-server',
   projectId: 'idhmztm4',
   dataset: 'production',
 

@@ -51,14 +51,19 @@ const ExerciseSelectionModal = ({
   };
 
   useEffect(() => {
-    if (searchQuery.trim() === "") {
-      setFilterdExercises(exercises);
-    } else {
-      const filtered = exercises.filter((exercise) =>
-        exercise.name.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-      setFilterdExercises(filtered);
-    }
+    const fetchFilteredExercises = async () => {
+      try {
+        const query = searchQuery
+          ? `*[_type == "exercise" && name match "${searchQuery}*"]`
+          : `*[_type == "exercise"]`;
+        const exercises = await client.fetch(query);
+        setExercises(exercises);
+        setFilterdExercises(exercises);
+      } catch (error) {
+        console.error("Error fetching exercises", error);
+      }
+    };
+    fetchFilteredExercises();
   }, [searchQuery, exercises]);
 
   const onRefresh = async () => {
@@ -66,8 +71,6 @@ const ExerciseSelectionModal = ({
     await fetchExercise();
     setRefreshing(false);
   };
-
-  console.log(exercises);
 
   return (
     <Modal

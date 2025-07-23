@@ -15,9 +15,15 @@ import { defineQuery } from "groq";
 import { client } from "@/lib/client/client";
 import { Exercise } from "sanity/sanity.types";
 import ExerciseCard from "@/app/components/exercies-card";
+import { TabsQueryResult } from "@/lib/sanity/types";
 
 export const exerciesQuery = defineQuery(`*[_type == "exercise"] {
  
+}`);
+
+export const tabsQuery = defineQuery(`*[_type == "tab"] {
+  _id,
+  name
 }`);
 
 const Exercises = () => {
@@ -26,6 +32,11 @@ const Exercises = () => {
   const [exercises, setExercies] = useState([]);
   const [filterExercies, setFilterExercies] = useState([]);
   const [stateError, setError] = useState("");
+
+  const [tabs, setTabs] = useState([]);
+  const [selectedTabId, setSelectedTabId] = useState<string | null>(null);
+
+  const router = useRouter();
 
   const fetchExercises = async () => {
     try {
@@ -40,32 +51,58 @@ const Exercises = () => {
     }
   };
 
+  const fetchTabs = async () => {
+    try {
+      const tabsData = await client.fetch(tabsQuery);
+      const tabsWithAll = [{ _id: "all", name: "All" }, ...tabsData]; // 👈 Add "All" tab
+      setTabs(tabsWithAll);
+    } catch (error) {
+      console.error("Error fetching tabs:", error);
+    }
+  };
+
   useEffect(() => {
     fetchExercises();
+    fetchTabs();
   }, []);
 
   useEffect(() => {
     const fetchFilteredExercises = async () => {
       try {
-        const query = searchQuery
-          ? `*[_type == "exercise" && name match "${searchQuery}*"]`
-          : `*[_type == "exercise"]`;
-        const exercises = await client.fetch(query);
-        setExercies(exercises);
-        setFilterExercies(exercises);
+        let query = `*[_type == "exercise"`;
+        if (searchQuery) {
+          query += ` && name match "${searchQuery}*"`;
+        }
+        if (selectedTabId && selectedTabId !== "all") {
+          query += ` && tab._ref == "${selectedTabId}"`;
+        }
+        query += `]{
+        _id,
+        name,
+        description,
+        difficulty,
+        image,
+        videoUrl,
+        inActive,
+        tab->{_id, name}
+      }`;
+
+        const result = await client.fetch(query);
+        setFilterExercies(result);
       } catch (error) {
-        setError(error.message || "Unknown error");
+        console.error("Error filtering exercises", error);
       }
     };
+
     fetchFilteredExercises();
-  }, [searchQuery, exercises]);
+  }, [searchQuery, selectedTabId]);
 
   const onRefresh = async () => {
     setRefreshing(true);
     await fetchExercises();
     setRefreshing(false);
   };
-  const router = useRouter();
+
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
       <View className=" px-4 py-4 bg-white border-b border-gray-200">
@@ -91,6 +128,38 @@ const Exercises = () => {
             </TouchableOpacity>
           )}
         </View>
+      </View>
+      <View>
+        <FlatList
+          data={tabs}
+          keyExtractor={(item) => item._id}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 15, marginVertical: 10 }}
+          renderItem={({ item }) => {
+            const isActive = item._id === selectedTabId;
+            return (
+              <TouchableOpacity
+                className={`px-4 h-6 mr-2 rounded-full ${
+                  isActive ? "bg-blue-600" : "bg-gray-300"
+                }`}
+                onPress={() =>
+                  setSelectedTabId((prev) =>
+                    prev === item._id ? null : item._id
+                  )
+                }
+              >
+                <Text
+                  className={`text-sm font-bold pt-1 capitalize ${
+                    isActive ? "text-white" : "text-gray-800"
+                  }`}
+                >
+                  {item.name}
+                </Text>
+              </TouchableOpacity>
+            );
+          }}
+        />
       </View>
 
       <FlatList

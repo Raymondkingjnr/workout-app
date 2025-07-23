@@ -53,6 +53,13 @@ export default defineType({
       ],
     }),
     defineField({
+      name: 'tab',
+      title: 'Tab',
+      description: 'Select the tab this exercise belongs to.',
+      type: 'reference',
+      to: [{type: 'tab'}],
+    }),
+    defineField({
       name: 'videoUrl',
       title: 'Video URL',
       description: 'A link to a video demonstrating the exercise.',
