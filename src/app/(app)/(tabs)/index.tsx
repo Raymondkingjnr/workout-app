@@ -1,8 +1,8 @@
 import { client } from "@/lib/client/client";
 import { GetWorkoutQueryResult } from "@/lib/sanity/types";
 import { useUser } from "@clerk/clerk-expo";
-import { Link, useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { useRouter } from "expo-router";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   RefreshControl,
@@ -16,13 +16,90 @@ import { getWorkoutQuery } from "./profile";
 import { formatDuration } from "lib/util";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { formatdate, getTotalSets } from "./history";
+import { BarChart, LineChart } from "react-native-gifted-charts";
 
 export default function HomePage() {
   const { user } = useUser();
   const router = useRouter();
   const [workouts, setWorkouts] = useState<GetWorkoutQueryResult>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+
+  const data = [{ value: 15 }, { value: 30 }, { value: 26 }, { value: 40 }];
+
+  const getMonthlySets = (workouts: GetWorkoutQueryResult) => {
+    const monthSetsMap: Record<string, number> = {
+      Jan: 0,
+      Feb: 0,
+      Mar: 0,
+      Apr: 0,
+      May: 0,
+      Jun: 0,
+      Jul: 0,
+      Aug: 0,
+      Sep: 0,
+      Oct: 0,
+      Nov: 0,
+      Dec: 0,
+    };
+
+    workouts.forEach((workout) => {
+      const date = new Date(workout.date || "");
+      const month = date.toLocaleString("en-US", { month: "short" });
+
+      if (workout.exercises && Array.isArray(workout.exercises)) {
+        const totalSets = workout.exercises.reduce((sum, ex) => {
+          return sum + (Array.isArray(ex.sets) ? ex.sets.length : 0);
+        }, 0);
+
+        monthSetsMap[month] += totalSets;
+      }
+    });
+
+    return Object.entries(monthSetsMap).map(([label, value]) => ({
+      label,
+      value,
+    }));
+  };
+
+  const getMonthlyExercises = (workouts: GetWorkoutQueryResult) => {
+    const monthExercisesMap: Record<string, number> = {
+      Jan: 0,
+      Feb: 0,
+      Mar: 0,
+      Apr: 0,
+      May: 0,
+      Jun: 0,
+      Jul: 0,
+      Aug: 0,
+      Sep: 0,
+      Oct: 0,
+      Nov: 0,
+      Dec: 0,
+    };
+
+    workouts.forEach((workout) => {
+      const date = new Date(workout.date || "");
+      const month = date.toLocaleString("en-US", { month: "short" }); // e.g., "Jan"
+
+      const exerciseCount = Array.isArray(workout.exercises)
+        ? workout.exercises.length
+        : 0;
+
+      monthExercisesMap[month] += exerciseCount;
+    });
+
+    return Object.entries(monthExercisesMap).map(([label, value]) => ({
+      label,
+      value,
+    }));
+  };
+
+  const monthlySetData = getMonthlySets(workouts);
+  const monthlyExerciseData = useMemo(
+    () => getMonthlyExercises(workouts),
+    [workouts]
+  );
 
   const fetchWorkouts = async () => {
     if (!user?.id) return;
@@ -62,7 +139,7 @@ export default function HomePage() {
       <SafeAreaView className=" flex-1 bg-gray-50">
         <View className=" flex-1 items-center justify-center">
           <ActivityIndicator size={"large"} color="#3b82f6" />
-          <Text className=" text-gray-600 mt-4">Loading Profile</Text>
+          <Text className=" text-gray-600 mt-4">Loading..</Text>
         </View>
       </SafeAreaView>
     );
@@ -84,33 +161,47 @@ export default function HomePage() {
         </View>
 
         <View className=" px-4 mb-6">
-          <View className=" bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-            <Text className=" text-lg font-semibold text-gray-900 mb-4">
-              Your Sets
-            </Text>
-            <View className=" flex-row justify-between">
-              <View className=" items-center flex-1">
+          <Text className=" text-lg font-semibold text-gray-900 mb-4">
+            Your Sets
+          </Text>
+
+          <View className=" flex-row gap-3 justify-between">
+            <View className=" flex-1 justify-between py-3 bg-blue-100 rounded-2xl px-2 shadow-sm shadow-blue-400 border border-blue-100">
+              <View className=" w-12 h-12 bg-blue-200 rounded-full items-center justify-center mb-3">
+                <Ionicons name="barbell-outline" size={24} color={"#000"} />
+              </View>
+              <View className="items-end">
                 <Text className=" text-2xl font-bold text-blue-600">
                   {totalWorkouts}
                 </Text>
-                <Text className=" text-sm text-gray-600 text-center">
-                  Total{"\n"}Workouts
+                <Text className="capitalize font-semibold text-sm text-black text-center">
+                  Total Workouts
                 </Text>
               </View>
-              <View className=" items-center flex-1">
+            </View>
+            <View className="flex-1 justify-between py-3 bg-white rounded-2xl px-2 shadow-sm border border-gray-100">
+              <View className=" w-12 h-12 bg-gray-100 rounded-full items-center justify-center mb-3">
+                <Ionicons name="timer-outline" size={24} color={"#000"} />
+              </View>
+              <View className=" items-end">
                 <Text className=" text-2xl font-bold text-green-600">
                   {formatDuration(totalDuration)}
                 </Text>
-                <Text className=" text-sm text-gray-600 text-center">
-                  Total{"\n"}Time
+                <Text className="capitalize font-semibold text-sm text-black text-center">
+                  Total Time
                 </Text>
               </View>
-              <View className=" items-center flex-1">
+            </View>
+            <View className=" flex-1 justify-between py-3 bg-purple-100 rounded-2xl px-2 shadow-sm shadow-purple-400 border border-purple-100">
+              <View className=" w-12 h-12 bg-purple-200 rounded-full items-center justify-center mb-3">
+                <Ionicons name="timer-outline" size={24} color={"#000"} />
+              </View>
+              <View className=" items-end">
                 <Text className=" font-bold text-2xl text-purple-600">
                   {averageDuration > 0 ? formatDuration(averageDuration) : "0m"}
                 </Text>
-                <Text className=" text-gray-600 text-center text-sm">
-                  Average workout duration
+                <Text className="capitalize text-ellipsis font-semibold text-black text-center text-sm">
+                  workout Avg
                 </Text>
               </View>
             </View>
@@ -152,9 +243,9 @@ export default function HomePage() {
             >
               <View className=" items-center">
                 <View className=" w-12 h-12 bg-gray-100 rounded-full items-center justify-center mb-3">
-                  <Ionicons name="time-outline" size={24} color={"#6b7280"} />
+                  <Ionicons name="time-outline" size={24} color={"#000"} />
                 </View>
-                <Text className="text-gray-900 font-medium text-center">
+                <Text className="text-gray-900 font-bold text-center">
                   Workout history
                 </Text>
               </View>
@@ -165,13 +256,9 @@ export default function HomePage() {
             >
               <View className=" items-center">
                 <View className=" w-12 h-12 bg-gray-100 rounded-full items-center justify-center mb-3">
-                  <Ionicons
-                    name="barbell-outline"
-                    size={24}
-                    color={"#6b7280"}
-                  />
+                  <Ionicons name="barbell-outline" size={24} color={"#000"} />
                 </View>
-                <Text className="text-gray-900 font-medium text-center">
+                <Text className="text-gray-900 font-bold text-center">
                   Workout Exercises
                 </Text>
               </View>
@@ -179,6 +266,38 @@ export default function HomePage() {
           </View>
         </View>
 
+        <View className=" px-3 my-5">
+          <Text className=" text-lg pl-2 font-semibold text-gray-900 mb-4">
+            Your Set Monthly Progress
+          </Text>
+          <BarChart
+            frontColor={"#2563eb"}
+            barWidth={22}
+            data={monthlySetData}
+            width={300}
+            height={200}
+            minHeight={3}
+            barBorderTopLeftRadius={5}
+            barBorderTopRightRadius={5}
+          />
+        </View>
+        <View className=" mt-5 px-3 my-5">
+          <Text className=" text-lg pl-2 font-semibold text-gray-900 mb-4">
+            Your Exercise Monthly Progress
+          </Text>
+          <LineChart
+            areaChart
+            data={monthlyExerciseData}
+            startFillColor="#2563eb"
+            startOpacity={0.8}
+            endFillColor="rgb(203, 217, 250)"
+            endOpacity={0.3}
+            width={300}
+            height={200}
+            curved
+            color="#2563eb"
+          />
+        </View>
         {lastWorkout && (
           <View className=" px-4 mb-8">
             <Text className=" text-lg font-semibold text-gray-900 mb-4">
@@ -195,7 +314,7 @@ export default function HomePage() {
             >
               <View className="flex-row items-center justify-between mb-4">
                 <View>
-                  <Text className="text-lg font-semibold text-gray-900">
+                  <Text className="text-lg font-semibold text-gray-900 capitalize">
                     {formatdate(lastWorkout.date || "")}
                   </Text>
                   <View className=" flex-row items-center mt-1">
@@ -217,9 +336,9 @@ export default function HomePage() {
               </View>
 
               <View className="flex-row items-center justify-between">
-                <Text className=" text-gray-600">
-                  {lastWorkout.exercises?.length || 0} exercises +{" "}
-                  {getTotalSets(lastWorkout)} sets
+                <Text className=" text-gray-600 font-bold text-sm">
+                  {lastWorkout.exercises?.length || 0} Exercises +{" "}
+                  {getTotalSets(lastWorkout)} Sets
                 </Text>
                 <Ionicons name="chevron-forward" size={20} color={"#6b7280"} />
               </View>

@@ -81,7 +81,6 @@ export default function Page() {
     try {
       const results = await client.fetch(getworkoutquery, { userId: user.id });
       setWorkOuts(results);
-      console.log(user.id);
 
       setLoading(true);
       setRefreshing(false);

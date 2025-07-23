@@ -56,8 +56,8 @@ export default defineType({
       name: 'tab',
       title: 'Tab',
       description: 'Select the tab this exercise belongs to.',
-      type: 'reference',
-      to: [{type: 'tab'}],
+      type: 'array',
+      of: [{type: 'reference', to: {type: 'tab'}}],
     }),
     defineField({
       name: 'videoUrl',

@@ -157,28 +157,28 @@ export default function Page() {
             </Text>
 
             <View className=" flex-row justify-between">
-              <View className=" items-center flex-1">
+              <View className=" items-center gap-1 flex-1">
                 <Text className=" text-2xl font-bold text-blue-600">
                   {totalWorkouts}
                 </Text>
-                <Text className=" text-sm text-gray-600 text-center">
-                  Total{"\n"}Workouts
+                <Text className=" capitalize font-bold  text-sm text-gray-600 text-center">
+                  Total Workouts
                 </Text>
               </View>
-              <View className=" items-center flex-1">
+              <View className=" items-center gap-1 flex-1">
                 <Text className=" text-2xl font-bold text-green-600">
                   {formatDuration(totalDuration)}
                 </Text>
-                <Text className=" text-sm text-gray-600 text-center">
-                  Total{"\n"}Time
+                <Text className="capitalize font-bold  text-sm text-gray-600 text-center">
+                  Total Time
                 </Text>
               </View>
-              <View className=" items-center flex-1">
+              <View className=" items-center gap-1 flex-1">
                 <Text className=" text-2xl font-bold text-purple-600">
                   {daysSinceJoining}
                 </Text>
-                <Text className=" text-sm text-gray-600 text-center">
-                  Days{"\n"}Since Joining
+                <Text className="capitalize font-bold  text-sm text-gray-600 text-center">
+                  Days Since Joining
                 </Text>
               </View>
             </View>
@@ -186,7 +186,7 @@ export default function Page() {
             {totalWorkouts > 0 && (
               <View className=" mt-4 pt-4 border-1 border-gray-100">
                 <View className=" flex-row items-center justify-between">
-                  <Text className=" text-gray-600">
+                  <Text className=" capitalize font-bold text-sm text-gray-600">
                     Average workout duration
                   </Text>
                   <Text className=" font-semibold text-gray-900">
