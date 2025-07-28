@@ -216,9 +216,11 @@ const ExerciesDetails = () => {
                 </Text>
               </View>
               {aiLoading ? (
-                <View className="bg-gray-50 rounded-lg px-4 items-center">
+                <View className="bg-gray-50 rounded-lg py-5 px-4 items-center">
                   <ActivityIndicator size={"small"} color={"#3b82f6"} />
-                  <Text>Gettong personalized guidance...</Text>
+                  <Text className=" pt-3">
+                    Getting personalized guidance...
+                  </Text>
                 </View>
               ) : (
                 <View className="bg-blue-50 rounded-lg p-4 border-l-4 border-blue-400">
@@ -227,9 +229,11 @@ const ExerciesDetails = () => {
                       body: {
                         paddingBottom: 20,
                       },
+
                       heading2: {
                         fontSize: 10,
                         fontWeight: "bold",
+                        lineHeight: 20,
                         color: "#1f2937",
                         marginTop: 12,
                         marginBottom: 6,
@@ -237,6 +241,7 @@ const ExerciesDetails = () => {
                       heading1: {
                         fontSize: 16,
                         fontWeight: "600",
+                        lineHeight: 20,
                         color: "#374151",
                         marginTop: 8,
                         marginBottom: 4,

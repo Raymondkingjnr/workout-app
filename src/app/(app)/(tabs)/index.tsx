@@ -17,6 +17,7 @@ import { formatDuration } from "lib/util";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { formatdate, getTotalSets } from "./history";
 import { BarChart, LineChart } from "react-native-gifted-charts";
+import CalendarWeekView from "@/app/components/calender";
 
 export default function HomePage() {
   const { user } = useUser();
@@ -24,8 +25,6 @@ export default function HomePage() {
   const [workouts, setWorkouts] = useState<GetWorkoutQueryResult>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-
-  const data = [{ value: 15 }, { value: 30 }, { value: 26 }, { value: 40 }];
 
   const getMonthlySets = (workouts: GetWorkoutQueryResult) => {
     const monthSetsMap: Record<string, number> = {
@@ -96,6 +95,7 @@ export default function HomePage() {
   };
 
   const monthlySetData = getMonthlySets(workouts);
+
   const monthlyExerciseData = useMemo(
     () => getMonthlyExercises(workouts),
     [workouts]
@@ -153,12 +153,7 @@ export default function HomePage() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        <View className=" px-4 pt-8 pb-6">
-          <Text className=" text-lg text-gray-600">Welcome Back</Text>
-          <Text className=" text-3xl font-bold text-gray-900 capitalize">
-            {user?.firstName || "Athlete"}! 💪
-          </Text>
-        </View>
+        <CalendarWeekView workoutDates={workouts.map((w) => w.date)} />
 
         <View className=" px-4 mb-6">
           <Text className=" text-lg font-semibold text-gray-900 mb-4">
